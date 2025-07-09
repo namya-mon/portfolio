@@ -44,7 +44,7 @@ export default function About() {
   }
 
   return (
-    <section className="min-h-screen p-8 flex items-center justify-center bg-white/90 backdrop-blur-sm">
+    <section id="about" className="min-h-screen p-8 flex items-center justify-center bg-white/90 backdrop-blur-sm">
       <div className="max-w-6xl w-full space-y-12">
         <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
         

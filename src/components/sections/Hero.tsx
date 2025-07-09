@@ -1,15 +1,16 @@
 'use client'
+import { usePortfolioMode } from '@/context/PortfolioMode'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
-import Computer from '../3d/Computer'
+import { useRef, useState } from 'react'
 import CanvasArt from '../3d/CanvasArt'
-import { usePortfolioMode } from '@/context/PortfolioMode'
+import Computer from '../3d/Computer'
 
 export default function Hero() {
   const [isArtMode, setIsArtMode] = useState(false)
   const { mode, toggleMode } = usePortfolioMode()
+  const aboutSectionRef = useRef<HTMLElement | null>(null)
 
   const handleToggle = () => {
     const newMode = !isArtMode
@@ -17,6 +18,34 @@ export default function Hero() {
     toggleMode()
   }
 
+  const scrollToAbout = () => {
+  const aboutSection = document.getElementById('about')
+  if (aboutSection) {
+    const startPosition = window.pageYOffset
+    const targetPosition = aboutSection.getBoundingClientRect().top
+    const distance = targetPosition - 100 // Adjust offset if needed
+    const duration = 1000 // milliseconds
+    let startTime: number | null = null
+
+    const animation = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime
+      const timeElapsed = currentTime - startTime
+      const run = easeInOutQuad(timeElapsed, startPosition, distance, duration)
+      window.scrollTo(0, run)
+      if (timeElapsed < duration) requestAnimationFrame(animation)
+    }
+
+    // Easing function
+    const easeInOutQuad = (t: number, b: number, c: number, d: number) => {
+      t /= d / 2
+      if (t < 1) return c / 2 * t * t + b
+      t--
+      return -c / 2 * (t * (t - 2) - 1) + b
+    }
+
+    requestAnimationFrame(animation)
+  }
+}
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {/* Toggle Button - Moved to bottom right */}
@@ -76,13 +105,14 @@ export default function Hero() {
             }
           </p>
         </div>
-        <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="text-white text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 rounded-full backdrop-blur-sm shadow-lg"
-        >
-          Scroll to explore ↓
-        </motion.div>
+        <motion.button 
+        onClick={scrollToAbout}
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+        className="text-white text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 rounded-full backdrop-blur-sm shadow-lg cursor-pointer pointer-events-auto hover:from-purple-600 hover:to-pink-600 transition-colors"
+      >
+        Scroll to explore ↓
+      </motion.button>
       </motion.div>
     </section>
   )
