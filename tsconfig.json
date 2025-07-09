@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "jsxImportSource": "react",
-    "types": ["react", "react-dom", "three", "@types/three"],
+    "types": ["react", "react-dom", "three", "@types/three","node"],
     "incremental": true,
     "plugins": [
       {
