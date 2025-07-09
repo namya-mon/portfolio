@@ -312,7 +312,7 @@ export function BelaromeModelWrapper() {
       preset="lobby"
       enableZoom={false}
       cameraPosition={[0, 2, 8]}
-      fov={50}
+      fov={40}
     />
   )
 }
