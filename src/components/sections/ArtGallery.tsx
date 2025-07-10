@@ -1,15 +1,27 @@
 'use client'
+import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 
-const artPieces = [
+interface ArtPiece {
+  id: number
+  title: string
+  description: string
+  category: string
+  year: number
+  mockImage?: string
+  underConstruction?: boolean
+}
+
+const artPieces: ArtPiece[] = [
   {
     id: 1,
     title: "Digital Landscape",
     description: "Mixed media digital painting exploring color theory",
     category: "Digital",
     year: 2023,
-    mockImage: "/images/art1.jpg"
+    mockImage: "/images/art1.jpg",
+    underConstruction: true
   },
   {
     id: 2,
@@ -17,7 +29,8 @@ const artPieces = [
     description: "Paper folding sculptures inspired by Japanese tradition",
     category: "Origami",
     year: 2022,
-    mockImage: "/images/art2.jpg"
+    mockImage: "/images/art2.jpg",
+    underConstruction: true
   },
   {
     id: 3,
@@ -25,7 +38,8 @@ const artPieces = [
     description: "Experimental work with geometric shapes",
     category: "Digital",
     year: 2024,
-    mockImage: "/images/art3.jpg"
+    mockImage: "/images/art3.jpg",
+    underConstruction: true
   },
   {
     id: 4,
@@ -33,7 +47,8 @@ const artPieces = [
     description: "Study of human expression using traditional techniques",
     category: "Traditional",
     year: 2021,
-    mockImage: "/images/art4.jpg"
+    mockImage: "/images/art4.jpg",
+    underConstruction: true
   },
   {
     id: 5,
@@ -41,7 +56,8 @@ const artPieces = [
     description: "Still life with fruits and vase",
     category: "Traditional",
     year: 2020,
-    mockImage: "/images/art5.jpg"
+    mockImage: "/images/art5.jpg",
+    underConstruction: true
   },
   {
     id: 6,
@@ -49,7 +65,8 @@ const artPieces = [
     description: "Complex geometric structures from simple folded units",
     category: "Origami",
     year: 2023,
-    mockImage: "/images/art6.jpg"
+    mockImage: "/images/art6.jpg",
+    underConstruction: true
   }
 ]
 
@@ -62,7 +79,7 @@ export default function ArtGallery() {
     : artPieces.filter(piece => piece.category === selectedCategory)
 
   return (
-    <section className="min-h-screen p-8 bg-white/90 backdrop-blur-sm">
+    <section className="min-h-screen p-8 bg-white/90 backdrop-blur-sm relative z-0">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-bold mb-8 text-gray-900">Art Gallery</h2>
         
@@ -102,14 +119,41 @@ export default function ArtGallery() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+              className="relative bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
               onClick={() => setSelectedPiece(piece.id)}
             >
-              <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
-                  <span className="text-gray-500">Artwork: {piece.title}</span>
-                </div>
+              {piece.underConstruction && (
+                <>
+                  <UnderConstructionTape 
+                    text="WORK IN PROGRESS" 
+                    angle={-4}
+                    width="w-[140%]"
+                    position="middle"
+                  />
+                  <UnderConstructionTape 
+                    text="CONTENT COMING" 
+                    angle={4}
+                    width="w-[140%]"
+                    stickyEnds={false}
+                    position="middle"
+                  />
+                </>
+              )}
+              
+              <div className="aspect-square bg-gray-200 flex items-center justify-center relative">
+                {piece.mockImage ? (
+                  <img 
+                    src={piece.mockImage} 
+                    alt={piece.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
+                    <span className="text-gray-500">Artwork: {piece.title}</span>
+                  </div>
+                )}
               </div>
+              
               <div className="p-4">
                 <h3 className="text-xl font-bold text-gray-800">{piece.title}</h3>
                 <p className="text-gray-600">{piece.description}</p>
@@ -122,23 +166,31 @@ export default function ArtGallery() {
           ))}
         </div>
 
-        {/* Modal for selected piece */}
+        {/* Modal */}
         {selectedPiece && (
           <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
               <div className="relative">
                 <button 
                   onClick={() => setSelectedPiece(null)}
-                  className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg z-10"
+                  className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg z-10 hover:bg-gray-100 transition-colors"
                 >
                   ✕
                 </button>
                 <div className="aspect-video bg-gray-200 flex items-center justify-center">
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
-                    <span className="text-gray-500">
-                      Detailed View: {artPieces.find(p => p.id === selectedPiece)?.title}
-                    </span>
-                  </div>
+                  {artPieces.find(p => p.id === selectedPiece)?.mockImage ? (
+                    <img 
+                      src={artPieces.find(p => p.id === selectedPiece)?.mockImage}
+                      alt={artPieces.find(p => p.id === selectedPiece)?.title}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
+                      <span className="text-gray-500">
+                        Detailed View: {artPieces.find(p => p.id === selectedPiece)?.title}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="p-6">

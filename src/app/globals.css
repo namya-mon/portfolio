@@ -94,3 +94,36 @@ p {
   background-clip: text;
   color: transparent;
 }
+
+/* For better tape appearance */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
+/* Tape styling */
+@keyframes tape-float {
+  0%, 100% { transform: rotate(-2deg) translateX(-5%) translateY(0); }
+  50% { transform: rotate(-1deg) translateX(-5%) translateY(-3px); }
+}
+
+/* Ensure proper layering */
+.relative {
+  position: relative;
+  z-index: 0;
+}
+
+/* Tape container */
+.under-construction-container {
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Prevent content clipping */
+.overflow-visible {
+  overflow: visible !important;
+}

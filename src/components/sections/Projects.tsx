@@ -1,4 +1,5 @@
 'use client'
+import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
 import { motion } from 'framer-motion'
 
 const projects = [
@@ -13,12 +14,7 @@ const projects = [
       "First place in school competition"
     ],
     technologies: ["JavaScript", "Photoshop", "Audacity"],
-    images: [
-      "/projects/ecoquest1.jpg",
-      "/projects/ecoquest2.jpg",
-      "/projects/ecoquest3.jpg",
-      "/projects/ecoquest4.jpg"
-    ]
+    underConstruction: true
   },
   {
     id: 2,
@@ -31,18 +27,13 @@ const projects = [
       "Accessibility focused design"
     ],
     technologies: ["Python", "TensorFlow", "React Native"],
-    images: [
-      "/projects/asl1.jpg",
-      "/projects/asl2.jpg",
-      "/projects/asl3.jpg",
-      "/projects/asl4.jpg"
-    ]
+    underConstruction: true
   }
 ]
 
 export default function Projects() {
   return (
-    <section className="py-20 px-8 bg-gray-50">
+    <section className="py-20 px-8 bg-gray-50 relative z-0">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-bold mb-12 text-center">Projects</h2>
         
@@ -54,15 +45,32 @@ export default function Projects() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className={`bg-white rounded-xl shadow-lg overflow-hidden ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} md:flex`}
+              className={`relative bg-white rounded-xl shadow-lg overflow-hidden ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} md:flex`}
             >
+              {project.underConstruction && (
+                <>
+                  <UnderConstructionTape 
+                    text="IN DEVELOPMENT" 
+                    angle={-4}
+                    width="w-[140%]"
+                    position="middle"
+                  />
+                  <UnderConstructionTape 
+                    text="PENDING ASSETS" 
+                    angle={4}
+                    width="w-[140%]"
+                    stickyEnds={false}
+                    position="middle"
+                  />
+                </>
+              )}
+              
               <div className="md:w-1/2 p-6">
-                {/* Image Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  {project.images.slice(0, 4).map((img, imgIndex) => (
+                  {[...Array(4)].map((_, imgIndex) => (
                     <div 
                       key={imgIndex} 
-                      className="aspect-square bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center"
+                      className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center"
                     >
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
                         <span className="text-gray-500">Screenshot {imgIndex + 1}</span>
