@@ -55,7 +55,7 @@ export default function Hero() {
         {mode === 'art' ? '👨‍💻 Switch to Developer Mode' : '🎨 Switch to Artist Mode'}
       </button>
       <a
-        href="/documents/CV Aymane Lamssaqui General.pdf"
+        href="/documents/CV Aymane Lamssaqui.pdf"
         download="Aymane_Lamssaqui_CV.pdf"
         className="absolute bottom-8 left-8 z-20 px-6 py-3 bg-white/90 text-gray-900 rounded-full shadow-lg hover:bg-white transition-all font-medium text-lg backdrop-blur-sm border border-white/30 flex items-center gap-2">
         <span>📄 Download CV</span>
