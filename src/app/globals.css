@@ -1,129 +1,112 @@
 @import "tailwindcss";
 
-
-
 :root {
-  --background: #171717;
-  --foreground: #ffffff;
-  --primary: #7c3aed;
-  --secondary: #f59e0b;
+  --background: #111111;
+  --foreground: #e0e0e0;
+  --primary: #3b82f6;
+  --secondary: #1d4ed8;
 }
 
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ededed;
-    --foreground: #0a0a0a;
-    --primary: #8b5cf6;
-    --secondary: #fbbf24;
-  }
-}
-
-.gallery-item {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-/* Base styles */
 body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  min-height: 100vh;
-}
-/* Typography */
-h1, h2, h3, h4 {
-  color: var(--foreground);
-  font-weight: 700;
-  line-height: 1.2;
-}
-h1 {
-  font-size: 2.5rem;
 }
 
-h2 {
-  font-size: 2rem;
-}
-
-h3 {
-  font-size: 1.75rem;
-}
-
-p {
-  color: var(--foreground);
-  opacity: 0.9;
-  line-height: 1.6;
-}
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--primary), var(--secondary));
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(to right, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* For better tape appearance */
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.6; }
-}
-
-/* Tape styling */
-@keyframes tape-float {
-  0%, 100% { transform: rotate(-2deg) translateX(-5%) translateY(0); }
-  50% { transform: rotate(-1deg) translateX(-5%) translateY(-3px); }
-}
-
-/* Ensure proper layering */
-.relative {
+/* CRT visual effect */
+.crt-effect {
   position: relative;
-  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  border-radius: 1rem;
 }
-
-/* Tape container */
-.under-construction-container {
-  overflow: visible;
+.crt-effect.zoomed {
+  transform: scale(1.05);
+  transition: transform 0.5s ease-out;
+}
+.crt-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 2px, 3px 100%;
+  z-index: 1;
   pointer-events: none;
+  animation: scanline 6s linear infinite;
+}
+.crt-effect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at center, transparent 70%, rgba(20, 20, 20, 0.7)),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  z-index: 2;
+  pointer-events: none;
+  animation: flicker 0.15s infinite alternate;
 }
 
-/* Prevent content clipping */
-.overflow-visible {
-  overflow: visible !important;
+@keyframes flicker {
+  0% { opacity: 0.9; }
+  20% { opacity: 0.95; }
+  40% { opacity: 0.85; }
+  60% { opacity: 0.92; }
+  80% { opacity: 0.88; }
+  100% { opacity: 1; }
 }
+
+@keyframes scanline {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.zoom-prompt {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  backdrop-filter: blur(10px);
+}
+
+.boot-screen-container {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
