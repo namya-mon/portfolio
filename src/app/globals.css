@@ -110,3 +110,260 @@ body {
   z-index: 1000;
 }
 
+/* Windows 95 Styles */
+@font-face {
+  font-family: 'MS Sans Serif';
+  src: url('/fonts/ms-sans-serif.ttf') format('truetype');
+}
+
+body {
+  font-family: 'MS Sans Serif', sans-serif;
+  color: #000;
+}
+
+/* Window Elements */
+.window-title-bar {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: white;
+}
+
+.window-content {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+}
+
+/* Buttons */
+.win95-button {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 2px 12px;
+}
+
+.win95-button:active {
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Inputs */
+.win95-input {
+  background: white;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  padding: 2px 4px;
+}
+
+/* Add these styles to your existing globals.css */
+
+/* Project Cards */
+.project-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 2px solid #c0c0c0;
+  background-color: #f0f0f0;
+  box-shadow: 
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #dfdfdf,
+    inset -2px -2px #808080,
+    inset 2px 2px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #dfdfdf;
+}
+
+.project-image {
+  position: relative;
+  aspect-ratio: 16/9;
+  background-color: #e0e0e0;
+}
+
+.project-image img {
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-image img {
+  transform: scale(1.05);
+}
+
+.project-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.project-card:hover .project-overlay {
+  opacity: 1;
+}
+
+.project-content {
+  padding: 1rem;
+}
+
+.project-title {
+  font-weight: bold;
+  color: #000080;
+  margin-bottom: 0.5rem;
+}
+
+.project-description {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-tag {
+  background-color: #e0e0e0;
+  border: 1px solid #c0c0c0;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Category Filter */
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.category-button.active {
+  background-color: #000080;
+  color: white;
+}
+
+.category-button:not(.active) {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.category-button:not(.active):hover {
+  background-color: #d0d0d0;
+}
+
+/* Art Grid */
+.art-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.art-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 2px solid #c0c0c0;
+  background-color: #f0f0f0;
+  box-shadow: 
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #dfdfdf,
+    inset -2px -2px #808080,
+    inset 2px 2px #ffffff;
+}
+
+.art-image {
+  position: relative;
+  aspect-ratio: 1/1;
+  background-color: #e0e0e0;
+}
+
+.art-info {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.art-title {
+  font-weight: bold;
+  color: #000080;
+}
+
+.art-meta {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.art-tags {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.art-tag {
+  background-color: #e0e0e0;
+  border: 1px solid #c0c0c0;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.625rem;
+}
+/* Add to your globals.css */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'VT323';
+  src: url('/fonts/VT323-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Apply fonts */
+body {
+  font-family: 'VT323', monospace;
+}
+
+h1, h2, h3, h4, h5, h6, .window-title-bar {
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Make titles bigger and bolder */
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.25rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}

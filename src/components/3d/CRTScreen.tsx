@@ -1,4 +1,5 @@
 'use client'
+import Desktop from '@/components/desktop/Desktop'
 import BootScreen from '@/components/ui/BootScreen'
 import { PortfolioModeProvider } from '@/context/PortfolioMode'
 import { Environment, Html, useGLTF } from '@react-three/drei'
@@ -10,7 +11,7 @@ type AppState = 'booting' | 'waiting' | 'zoomed' | 'zoomedIn'
 
 function MonitorModel({ children, zoomed }: { 
   children: React.ReactNode, 
-  zoomed: boolean
+  zoomed: boolean 
 }) {
   const { scene, nodes } = useGLTF('/models/monitor.glb') as any
   const group = useRef<THREE.Group>(null)
@@ -32,16 +33,15 @@ function MonitorModel({ children, zoomed }: {
     }
   }, [nodes])
 
-  // ✅ Responsive monitor scaling based on both width and height
   const getScaleFactor = () => {
     const widthRatio = size.width / 1000
     const heightRatio = size.height / 600
-    return Math.min(widthRatio, heightRatio) * 0.9 // 0.9 adds some padding
+    return Math.min(widthRatio, heightRatio) * 0.9
   }
 
   const scaleFactor = getScaleFactor()
 
-     return (
+  return (
     <group ref={group} scale={[scaleFactor, scaleFactor, scaleFactor]} position={[0, -1.5, 0]}>
       <primitive object={scene} />
       <group ref={screenRef} position={[0, 1.46, -0.263]} rotation={[0, 0, 0]}>
@@ -52,7 +52,7 @@ function MonitorModel({ children, zoomed }: {
             width: `${screenSize[0] * 94}px`,
             height: `${screenSize[1] * 84}px`,
             overflow: 'hidden',
-            background: '#000', // Ensures black background
+            background: '#000',
             borderRadius: '8px',
           }}
           className="w-full h-full"
@@ -84,9 +84,9 @@ function CameraController({
   const currentPosition = useRef(new THREE.Vector3())
 
   const cameraPositions = {
-    waiting: new THREE.Vector3(0, 0, 9),
-    zoomed: new THREE.Vector3(0, 0,6),
-    zoomedIn: new THREE.Vector3(0, 0,4.3)
+    waiting: new THREE.Vector3(-5, 5, 12), // Top-left angle, further away
+    zoomed: new THREE.Vector3(0, 0, 6),
+    zoomedIn: new THREE.Vector3(0, 0, 4.3)
   }
 
   useEffect(() => {
@@ -118,38 +118,37 @@ function CameraController({
   return null
 }
 
-export default function CRTScreen({ children }: { children: React.ReactNode }) {
+export default function CRTScreen() {
   const [state, setState] = useState<AppState>('booting')
   const [showBootScreen, setShowBootScreen] = useState(true)
   const [interactionReady, setInteractionReady] = useState(false)
-  const [contentVisible, setContentVisible] = useState(false)
   const monitorRef = useRef<HTMLDivElement>(null)
 
-
-  const handleBootComplete = () => {
-    setState('waiting')
-    setContentVisible(true)
-    setTimeout(() => setShowBootScreen(false), 800)
+  const playSound = (sound: 'startup' | 'click' | 'close') => {
+    const audio = new Audio(`/sounds/${sound}.mp3`)
+    audio.volume = 0.3
+    audio.play().catch(e => console.log("Audio play failed:", e))
   }
 
-
-  const handleClick = (e: React.MouseEvent) => {
-    // Check if click was inside the monitor
-    const isClickInsideMonitor = monitorRef.current?.contains(e.target as Node)
-    
-    if (state === 'waiting' && !isClickInsideMonitor) {
-      // Click outside monitor - zoom in
-      setState('zoomed')
-      setInteractionReady(true)
-    } else if ((state === 'zoomed' || state === 'zoomedIn') && isClickInsideMonitor) {
-      // Click inside monitor - zoom out
-      setState('waiting')
-    }
+  const handleBootComplete = () => {
+    playSound('startup')
+    setState('waiting')
+    setTimeout(() => setShowBootScreen(false), 800)
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && (state === 'zoomed' || state === 'zoomedIn')) {
       setState('waiting')
+    } else if (state === 'waiting' && e.key !== 'Escape') {
+      setState('zoomed')
+      setInteractionReady(true)
+    }
+  }
+
+  const handleClick = () => {
+    if (state === 'waiting') {
+      setState('zoomed')
+      setInteractionReady(true)
     }
   }
 
@@ -161,13 +160,15 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('click', handleClick)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('click', handleClick)
+    }
   }, [state])
 
-  
   return (
-    <div className="w-full h-screen bg-[#f5f5f5] relative" onClick={handleClick}>
-      {/* Only show Canvas and MonitorModel after boot */}
+    <div className="w-full h-screen bg-[#f5f5f5] relative">
       {!showBootScreen && (
         <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
           <Suspense fallback={null}>
@@ -183,31 +184,29 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
 
             <MonitorModel zoomed={state === 'zoomedIn'}>
               <div 
-                ref={monitorRef} // Add ref to monitor content
+                ref={monitorRef}
+                className="monitor-content w-full h-full"
+                onClick={(e) => e.stopPropagation()}
                 onMouseEnter={() => handleScreenHover(true)}
                 onMouseLeave={() => handleScreenHover(false)}
-                className="w-full h-full"
-                onClick={(e) => e.stopPropagation()} // Prevent event bubbling
               >
-                {children}
+                <Desktop playSound={playSound} />
               </div>
             </MonitorModel>
           </Suspense>
         </Canvas>
       )}
 
-      {/* Fullscreen boot overlay - only this should be visible during boot */}
       {showBootScreen && (
         <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
           <BootScreen onDone={handleBootComplete} />
         </div>
       )}
 
-      {/* Click to zoom prompt */}
       {state === 'waiting' && !showBootScreen && (
         <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
           <div className="text-white text-sm mb-6 px-6 py-3 bg-black bg-opacity-50 rounded-lg backdrop-blur-sm animate-pulse">
-            Click to zoom in • ESC to zoom out
+            Press any key or click to zoom in • ESC to zoom out
           </div>
         </div>
       )}
