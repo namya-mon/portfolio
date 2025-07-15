@@ -8,13 +8,25 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showCursor, setShowCursor] = useState(true)
   const [bootComplete, setBootComplete] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [showPressStart, setShowPressStart] = useState(false)
 
   const bootLines = [
-    'Booting AymaneOS v3.0...',
+    'AymaneOS HSP v3.0 (C) 1998 Aymane Lamssaqui Inc.',
+    'Checking RAM = 14000 OK',
     'Initializing system components...',
     'Loading kernel modules...',
     'Starting system services...',
     'Mounting filesystems...',
+    'Loading resources (18/19)...',
+    'Loaded ctType ... 50%',
+    'Loaded moxidDown ... 10%',
+    'Loaded keyboardKeydown2 ... 60%',
+    'Loaded keyboardKeydown6 ... 74%',
+    'Loaded moxidUp ... 70%',
+    'Loaded keyboardKeydown5 ... 80%',
+    'Loaded keyboardKeydown6 ... 95%',
+    'Loaded startup ...',
     'Launching desktop environment...',
     'System ready'
   ]
@@ -30,6 +42,12 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     if (currentIndex >= bootLines.length) {
       setBootComplete(true)
+      setTimeout(() => {
+        setShowWelcome(true)
+        setTimeout(() => {
+          setShowPressStart(true)
+        }, 1500)
+      }, 500)
       return
     }
 
@@ -46,13 +64,13 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
         setCurrentLine('')
         setCurrentIndex(prev => prev + 1)
       }
-    }, 30)
+    }, currentIndex < 2 ? 10 : 30) // Faster typing for first few lines
 
     return () => clearInterval(typingInterval)
   }, [currentIndex])
 
   useEffect(() => {
-    if (!bootComplete) return
+    if (!showPressStart) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -71,27 +89,36 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('click', handleClick)
     }
-  }, [bootComplete, onDone])
+  }, [showPressStart, onDone])
 
   return (
-<div className="fixed inset-0 bg-black flex items-center justify-center w-screen h-screen">
-      <div className="font-mono text-green-500 max-w-2xl mx-auto p-4">
-        {lines.map((line, idx) => (
-          <div key={idx} className="whitespace-pre">{line}</div>
-        ))}
-        <div className="whitespace-pre">
-          {currentIndex < bootLines.length ? (
-            <>
-              {currentLine}
-              <span className={`inline-block w-2 h-5 bg-green-500 ml-1 ${showCursor ? 'opacity-100' : 'opacity-0'}`}></span>
-            </>
-          ) : (
-            <div className="mt-4 text-green-400">
-              Press any key to continue...
+    <div className="fixed inset-0 bg-black flex items-center justify-center w-screen h-screen">
+      {!showWelcome ? (
+        <div className="font-mono text-green-500 max-w-2xl mx-auto p-4">
+          {lines.map((line, idx) => (
+            <div key={idx} className="whitespace-pre">{line}</div>
+          ))}
+          <div className="whitespace-pre">
+            {currentIndex < bootLines.length ? (
+              <>
+                {currentLine}
+                <span className={`inline-block w-2 h-5 bg-green-500 ml-1 ${showCursor ? 'opacity-100' : 'opacity-0'}`}></span>
+              </>
+            ) : null}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center text-center">
+          <div className="text-white text-3xl font-bold mb-8 animate-fade-in">
+            Aymane Lamssaqui Portfolio Showcase
+          </div>
+          {showPressStart && (
+            <div className="text-green-500 text-xl animate-pulse">
+              Press any key to begin
             </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -21,31 +21,31 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-purple-100/80 via-pink-100/80 to-orange-100/80 py-12 px-8">
+    <footer className="bg-gray-300 border-t-2 border-gray-400 py-6 px-8 shadow-[0_-2px_5px_rgba(0,0,0,0.2)]">
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-3 gap-8">
           <div>
-            <p className="text-2xl font-bold mb-4 text-grey">Aymane Lamssaqui</p>
-            <p className="text-grey/90">Computer Engineer & Creative Developer</p>
+            <p className="text-xl font-bold mb-2 text-gray-800">Aymane Lamssaqui</p>
+            <p className="text-gray-600">Computer Engineer & Creative Developer</p>
           </div>
           
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-grey">Contact</h4>
+            <h4 className="text-md font-bold mb-3 text-gray-800 border-b border-gray-400 pb-1">Contact</h4>
             <ul className="space-y-2">
-              <li className="flex items-center text-grey/90">
-                <svg className="w-5 h-5 mr-2 text-grey" fill="currentColor" viewBox="0 0 24 24">
+              <li className="flex items-center text-gray-700">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 Fes, Morocco
               </li>
-              <li className="flex items-center text-grey/90">
-                <svg className="w-5 h-5 mr-2 text-grey" fill="currentColor" viewBox="0 0 24 24">
+              <li className="flex items-center text-gray-700">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
                 alemssaqui@gmail.com
               </li>
-              <li className="flex items-center text-grey/90">
-                <svg className="w-5 h-5 mr-2 text-grey" fill="currentColor" viewBox="0 0 24 24">
+              <li className="flex items-center text-gray-700">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
                 </svg>
                 +212 648-709912
@@ -54,8 +54,8 @@ export default function Footer() {
           </div>
           
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-grey">Connect</h4>
-            <div className="flex space-x-4">
+            <h4 className="text-md font-bold mb-3 text-gray-800 border-b border-gray-400 pb-1">Connect</h4>
+            <div className="flex space-x-3">
               {socialLinks.map((link) => (
                 <motion.a
                   key={link.name}
@@ -63,9 +63,9 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   whileHover={{ y: -2 }}
-                  className="bg-grey/20 p-2 rounded-full hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  className="bg-gray-200 p-2 rounded border border-gray-400 hover:bg-gray-100 transition-colors"
                 >
-                  <svg className="w-6 h-6 text-grey" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24">
                     <path d={link.icon} fill="currentColor" />
                   </svg>
                 </motion.a>
@@ -74,7 +74,7 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="border-t border-grey/20 mt-8 pt-8 text-center text-grey/80">
+        <div className="border-t border-gray-400 mt-6 pt-4 text-center text-gray-600">
           <p>© {new Date().getFullYear()} Aymane Lamssaqui. All rights reserved.</p>
         </div>
       </div>

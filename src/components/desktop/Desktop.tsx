@@ -1,11 +1,10 @@
 'use client'
-import { useState, useEffect } from 'react'
 import Window from '@/components/desktop/Window'
 import About from '@/components/sections/About'
+import Contact from '@/components/sections/Contact'
 import Experience from '@/components/sections/Experience'
 import Projects from '@/components/sections/Projects'
-import Contact from '@/components/sections/Contact'
-import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
+import { useEffect, useRef, useState } from 'react'
 
 interface DesktopProps {
   playSound: (sound: 'startup' | 'click' | 'close') => void
@@ -13,13 +12,15 @@ interface DesktopProps {
   toggleMute: () => void
 }
 
+interface WindowState {
+  id: string
+  isOpen: boolean
+  isMinimized: boolean
+  position: { x: number; y: number }
+}
+
 export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps) {
-  const [windows, setWindows] = useState<{
-    id: string, 
-    isOpen: boolean, 
-    isMinimized: boolean,
-    position: { x: number, y: number }
-  }[]>([
+  const [windows, setWindows] = useState<WindowState[]>([
     { 
       id: 'portfolio', 
       isOpen: true, 
@@ -30,17 +31,37 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
   
   const [activeWindow, setActiveWindow] = useState('portfolio')
   const [time, setTime] = useState('')
+  const timeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const [showStartMenu, setShowStartMenu] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
 
-  // Update time every second
+  // Update time every minute
   useEffect(() => {
     const updateTime = () => {
-      setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+      const now = new Date()
+      const formattedTime = now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      setTime(formattedTime)
     }
+
+    const now = new Date()
+    const secondsUntilNextMinute = 60 - now.getSeconds()
+    
     updateTime()
-    const timer = setInterval(updateTime, 1000)
-    return () => clearInterval(timer)
+    
+    const initialTimeout = setTimeout(() => {
+      updateTime()
+      timeIntervalRef.current = setInterval(updateTime, 60000)
+    }, secondsUntilNextMinute * 1000)
+
+    return () => {
+      clearTimeout(initialTimeout)
+      if (timeIntervalRef.current) {
+        clearInterval(timeIntervalRef.current)
+      }
+    }
   }, [])
 
   const desktopIcons = [
@@ -98,6 +119,17 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
     ))
   }
 
+  const openCV = () => {
+    playSound('click')
+    window.open('/documents/CV Aymane Lamssaqui.pdf', '_blank')
+    setShowStartMenu(false)
+  }
+
+  const shutdown = () => {
+    playSound('close')
+    window.location.reload()
+  }
+
   const getWindowContent = (id: string) => {
     if (id === 'portfolio') {
       return <PortfolioContent />
@@ -114,7 +146,6 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
   const PortfolioContent = () => {
     return (
       <div className="w-full h-full flex">
-        {/* Enhanced Sidebar */}
         <div className="w-48 bg-gray-200 border-r border-gray-400 p-2 flex flex-col">
           <div className="p-2 mb-4 bg-blue-600 text-white font-bold text-center">
             Navigation
@@ -140,7 +171,6 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
           ))}
         </div>
         
-        {/* Content Area */}
         <div className="flex-1 overflow-auto bg-white">
           {activeTab === 'home' && <HomeContent />}
           {activeTab === 'about' && <About />}
@@ -201,23 +231,32 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
 
       {/* Windows */}
       {windows.map(window => !window.isMinimized && (
-        <Window
-          key={window.id}
-          title={desktopIcons.find(i => i.id === window.id)?.title || ''}
-          isActive={activeWindow === window.id}
-          onClose={() => closeWindow(window.id)}
-          onMinimize={() => minimizeWindow(window.id)}
-          onFocus={() => setActiveWindow(window.id)}
-          position={window.position}
-          size={{ width: 1100, height: 600 }}
-          onPositionChange={(pos) => updateWindowPosition(window.id, pos)}
+        <div 
+          key={window.id} 
+          style={{ 
+            zIndex: activeWindow === window.id ? 50 : 40,
+            position: 'absolute',
+            left: `${window.position.x}px`,
+            top: `${window.position.y}px`
+          }}
         >
-          {getWindowContent(window.id)}
-        </Window>
+          <Window
+            title={desktopIcons.find(i => i.id === window.id)?.title || ''}
+            isActive={activeWindow === window.id}
+            onClose={() => closeWindow(window.id)}
+            onMinimize={() => minimizeWindow(window.id)}
+            onFocus={() => setActiveWindow(window.id)}
+            position={window.position}
+            size={{ width: 1100, height: 600 }}
+            onPositionChange={(pos) => updateWindowPosition(window.id, pos)}
+          >
+            {getWindowContent(window.id)}
+          </Window>
+        </div>
       ))}
 
       {/* Taskbar */}
-      <div className="fixed bottom-0 left-0 right-0 h-8 bg-gray-400 border-t border-gray-300 flex items-center px-2 z-[9999] rounded-b-lg shadow-[0_-2px_5px_rgba(0,0,0,0.2)]">
+      <div className="fixed bottom-0 left-0 right-0 h-8 bg-gray-400 border-t border-gray-300 flex items-center px-2 z-[100] rounded-b-lg shadow-[0_-2px_5px_rgba(0,0,0,0.2)]">
         <button 
           className="h-6 px-3 bg-gray-300 border border-gray-500 flex items-center"
           onClick={() => {
@@ -260,31 +299,48 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
       {/* Start Menu */}
       {showStartMenu && (
         <div 
-          className="fixed bottom-8 left-0 w-48 bg-gray-300 border border-gray-500 z-50"
+          className="fixed bottom-8 left-0 w-48 bg-gray-300 border border-gray-500 z-[110]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-1 bg-blue-600 text-white font-bold">
             Windows 95
           </div>
           <div className="divide-y divide-gray-400">
+            {/* Programs - lists all available apps */}
+            <div className="group relative">
+              <button 
+                className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white flex justify-between items-center"
+                onClick={() => playSound('click')}
+              >
+                Programs
+                <span>▶</span>
+              </button>
+              <div className="hidden group-hover:block absolute left-full bottom-0 w-48 bg-gray-300 border border-gray-500 z-[120]">
+                {desktopIcons.map(icon => (
+                  <button
+                    key={icon.id}
+                    className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
+                    onClick={() => {
+                      playSound('click')
+                      openWindow(icon.id)
+                      setShowStartMenu(false)
+                    }}
+                  >
+                    {icon.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Documents - opens CV */}
             <button 
               className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
-              onClick={() => {
-                playSound('click')
-                setShowStartMenu(false)
-              }}
-            >
-              Programs
-            </button>
-            <button 
-              className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
-              onClick={() => {
-                playSound('click')
-                setShowStartMenu(false)
-              }}
+              onClick={openCV}
             >
               Documents
             </button>
+
+            {/* Settings - currently just closes menu */}
             <button 
               className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
               onClick={() => {
@@ -294,12 +350,11 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
             >
               Settings
             </button>
+
+            {/* Shut Down - refreshes page */}
             <button 
               className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
-              onClick={() => {
-                playSound('click')
-                setShowStartMenu(false)
-              }}
+              onClick={shutdown}
             >
               Shut Down...
             </button>

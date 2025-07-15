@@ -118,13 +118,48 @@ function CameraController({
   return null
 }
 
-export default function CRTScree ({ children }: { children: React.ReactNode })  {
+export default function CRTScreen({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>('booting')
   const [showBootScreen, setShowBootScreen] = useState(true)
   const [interactionReady, setInteractionReady] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
+  const [currentTime, setCurrentTime] = useState('')
   const monitorRef = useRef<HTMLDivElement>(null)
   const ambientSoundRef = useRef<HTMLAudioElement | null>(null)
+  const timeIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Time updater - optimized to only update when minute changes
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date()
+      const formattedTime = now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      setCurrentTime(formattedTime)
+    }
+
+    // Calculate time until next minute
+    const now = new Date()
+    const secondsUntilNextMinute = 60 - now.getSeconds()
+    
+    // Initial update
+    updateTime()
+    
+    // Set timeout for next minute change
+    const initialTimeout = setTimeout(() => {
+      updateTime()
+      // Then set regular interval
+      timeIntervalRef.current = setInterval(updateTime, 60000)
+    }, secondsUntilNextMinute * 1000)
+
+    return () => {
+      clearTimeout(initialTimeout)
+      if (timeIntervalRef.current) {
+        clearInterval(timeIntervalRef.current)
+      }
+    }
+  }, [])
 
   const playSound = (sound: 'startup' | 'click' | 'close') => {
     if (isMuted) return
@@ -191,11 +226,9 @@ export default function CRTScree ({ children }: { children: React.ReactNode })  
     }
   }
 
-  // Prevent page scroll when mouse is over monitor
   const handleWheel = (e: WheelEvent) => {
     const monitorContent = monitorRef.current;
     if (monitorContent && monitorContent.contains(e.target as Node)) {
-      // Find the scrollable content area inside the window
       const contentArea = monitorContent.querySelector('.window-content-area');
       if (contentArea) {
         contentArea.scrollTop += e.deltaY;
@@ -203,7 +236,6 @@ export default function CRTScree ({ children }: { children: React.ReactNode })  
       }
     }
   }
-  
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
@@ -218,6 +250,40 @@ export default function CRTScree ({ children }: { children: React.ReactNode })  
 
   return (
     <div className="w-full h-screen bg-[#f5f5f5] relative overflow-hidden">
+      {/* Corner Info Display and Mute Button */}
+      {!showBootScreen && (
+        <>
+          {/* Mute Button - Top Left */}
+          <button
+            onClick={toggleMute}
+            className="absolute top-6 left-6 z-10 p-2 text-black hover:text-gray-600 transition-colors"
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            )}
+          </button>
+
+          {/* Corner Info - Top Right */}
+          <div className="absolute top-6 right-6 z-10 text-right pointer-events-none">
+            <div className="text-black">
+              <div className="text-xl font-medium">Aymane Lamssaqui</div>
+              <div className="text-sm text-gray-600">Software Engineer</div>
+              <div className="text-xs text-gray-500 mt-1">{currentTime}</div>
+            </div>
+          </div>
+        </>
+      )}
+
       {!showBootScreen && (
         <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
           <Suspense fallback={null}>
