@@ -44,23 +44,23 @@ function MonitorModel({ children, zoomed }: {
   return (
     <group ref={group} scale={[scaleFactor, scaleFactor, scaleFactor]} position={[0, -1.5, 0]}>
       <primitive object={scene} />
-      <group ref={screenRef} position={[0, 1.46, -0.263]} rotation={[0, 0, 0]}>
+      <group ref={screenRef} position={[0, 1.45, -0.263]} rotation={[0, 0, 0]}>
         <Html
           transform
           distanceFactor={1}
           style={{
             width: `${screenSize[0] * 94}px`,
-            height: `${screenSize[1] * 84}px`,
+            height: `${screenSize[1] * 85}px`,
             overflow: 'hidden',
             background: '#000',
-            borderRadius: '8px',
+            borderRadius: '15px',
           }}
           className="w-full h-full"
           center
         >
           <div className="w-full h-full crt-effect">
             <PortfolioModeProvider>
-              <div className="w-full h-full overflow-y-auto scrollbar-hide">
+              <div className="w-full h-full overflow-hidden">
                 {children || <div className="w-full h-full bg-black" />}
               </div>
             </PortfolioModeProvider>
@@ -84,7 +84,7 @@ function CameraController({
   const currentPosition = useRef(new THREE.Vector3())
 
   const cameraPositions = {
-    waiting: new THREE.Vector3(-5, 5, 12), // Top-left angle, further away
+    waiting: new THREE.Vector3(-10 , 5, 15), // Top-left angle, further away
     zoomed: new THREE.Vector3(0, 0, 6),
     zoomedIn: new THREE.Vector3(0, 0, 4.3)
   }
@@ -122,13 +122,46 @@ export default function CRTScreen() {
   const [state, setState] = useState<AppState>('booting')
   const [showBootScreen, setShowBootScreen] = useState(true)
   const [interactionReady, setInteractionReady] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
   const monitorRef = useRef<HTMLDivElement>(null)
+  const ambientSoundRef = useRef<HTMLAudioElement | null>(null)
 
   const playSound = (sound: 'startup' | 'click' | 'close') => {
-    const audio = new Audio(`/sounds/${sound}.mp3`)
+    if (isMuted) return
+    const audio = new Audio(`/sounds/${sound}.wav`)
     audio.volume = 0.3
     audio.play().catch(e => console.log("Audio play failed:", e))
   }
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted)
+    if (ambientSoundRef.current) {
+      if (!isMuted) {
+        ambientSoundRef.current.pause()
+      } else {
+        ambientSoundRef.current.play().catch(e => console.log("Ambient audio play failed:", e))
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (!showBootScreen && state !== 'booting') {
+      ambientSoundRef.current = new Audio('/sounds/ambient.wav')
+      ambientSoundRef.current.loop = true
+      ambientSoundRef.current.volume = 0.2
+      
+      if (!isMuted) {
+        ambientSoundRef.current.play().catch(e => console.log("Ambient audio play failed:", e))
+      }
+    }
+
+    return () => {
+      if (ambientSoundRef.current) {
+        ambientSoundRef.current.pause()
+        ambientSoundRef.current = null
+      }
+    }
+  }, [showBootScreen, state, isMuted])
 
   const handleBootComplete = () => {
     playSound('startup')
@@ -158,17 +191,33 @@ export default function CRTScreen() {
     }
   }
 
+  // Prevent page scroll when mouse is over monitor
+  const handleWheel = (e: WheelEvent) => {
+    const monitorContent = monitorRef.current;
+    if (monitorContent && monitorContent.contains(e.target as Node)) {
+      // Find the scrollable content area inside the window
+      const contentArea = monitorContent.querySelector('.window-content-area');
+      if (contentArea) {
+        contentArea.scrollTop += e.deltaY;
+        e.preventDefault();
+      }
+    }
+  }
+  
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('click', handleClick)
+    window.addEventListener('wheel', handleWheel, { passive: false })
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('click', handleClick)
+      window.removeEventListener('wheel', handleWheel)
     }
   }, [state])
 
   return (
-    <div className="w-full h-screen bg-[#f5f5f5] relative">
+    <div className="w-full h-screen bg-[#f5f5f5] relative overflow-hidden">
       {!showBootScreen && (
         <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
           <Suspense fallback={null}>
@@ -190,7 +239,7 @@ export default function CRTScreen() {
                 onMouseEnter={() => handleScreenHover(true)}
                 onMouseLeave={() => handleScreenHover(false)}
               >
-                <Desktop playSound={playSound} />
+                <Desktop playSound={playSound} isMuted={isMuted} toggleMute={toggleMute} />
               </div>
             </MonitorModel>
           </Suspense>

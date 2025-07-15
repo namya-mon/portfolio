@@ -247,27 +247,50 @@ function ModelWrapper({
   enablePan = true,
   enableRotate = true
 }: ModelWrapperProps) {
+  const [size, setSize] = useState({ width: 256, height: 256 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      const container = document.getElementById('model-container');
+      if (container) {
+        setSize({
+          width: container.clientWidth,
+          height: container.clientHeight
+        });
+      }
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   return (
     <Canvas 
       style={{ width: '100%', height: '100%' }}
-      camera={{ position: cameraPosition, fov }}
+      camera={{ 
+        position: cameraPosition, 
+        fov,
+        aspect: size.width / size.height
+      }}
     >
       <ambientLight intensity={0.6} />
       <pointLight position={[10, 10, 10]} intensity={1} />
       <pointLight position={[-10, 5, -5]} intensity={0.5} />
       
       <Suspense fallback={null}>
-        <ModelComponent />
+        <ModelComponent scale={Math.min(size.width, size.height) / 200} />
       </Suspense>
       
       <OrbitControls
         enableZoom={enableZoom}
         enablePan={enablePan}
         enableRotate={enableRotate}
+        target={[0, 0, 0]} // Ensure rotation is around center
       />
       <Environment preset={preset} />
     </Canvas>
-  )
+  );
 }
 
 // Wrapper components for each model remain the same

@@ -1,54 +1,39 @@
 'use client'
+import { useState, useEffect } from 'react'
 import Window from '@/components/desktop/Window'
 import About from '@/components/sections/About'
-import Contact from '@/components/sections/Contact'
 import Experience from '@/components/sections/Experience'
 import Projects from '@/components/sections/Projects'
-import { Icon } from '@/components/ui/Icones'
-import { useEffect, useState } from 'react'
+import Contact from '@/components/sections/Contact'
+import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
 
 interface DesktopProps {
   playSound: (sound: 'startup' | 'click' | 'close') => void
+  isMuted: boolean
+  toggleMute: () => void
 }
 
-interface WindowState {
-  id: string
-  isOpen: boolean
-  isMinimized: boolean
-  position: { x: number; y: number }
-}
-
-export default function Desktop({ playSound }: DesktopProps) {
-  const [windows, setWindows] = useState<WindowState[]>([
+export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps) {
+  const [windows, setWindows] = useState<{
+    id: string, 
+    isOpen: boolean, 
+    isMinimized: boolean,
+    position: { x: number, y: number }
+  }[]>([
     { 
       id: 'portfolio', 
       isOpen: true, 
       isMinimized: false,
-      position: getInitialPosition()
+      position: { x: 100, y: 100 }
     }
   ])
   
   const [activeWindow, setActiveWindow] = useState('portfolio')
   const [time, setTime] = useState('')
   const [showStartMenu, setShowStartMenu] = useState(false)
+  const [activeTab, setActiveTab] = useState('home')
 
-  function getInitialPosition() {
-    if (typeof window === 'undefined') return { x: 100, y: 100 }
-    return {
-      x: Math.max(0, (window.innerWidth - 800) / 2),
-      y: Math.max(0, (window.innerHeight - 600) / 2)
-    }
-  }
-
-  function getNextWindowPosition() {
-    const offset = 30
-    const count = windows.length
-    return {
-      x: Math.min(offset * count, window.innerWidth - 800 - offset),
-      y: Math.min(offset * count, window.innerHeight - 600 - offset)
-    }
-  }
-
+  // Update time every second
   useEffect(() => {
     const updateTime = () => {
       setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
@@ -59,50 +44,28 @@ export default function Desktop({ playSound }: DesktopProps) {
   }, [])
 
   const desktopIcons = [
-    { id: 'portfolio', title: 'Portfolio.exe', icon: 'portfolio' },
-    { id: 'about', title: 'About.txt', icon: 'about' },
-    { id: 'experience', title: 'Experience.doc', icon: 'experience' },
-    { id: 'projects', title: 'Projects.fld', icon: 'projects' },
-    { id: 'contact', title: 'Contact.com', icon: 'contact' }
-  ]
-
-  const startMenuItems = [
-    {
-      name: 'Documents',
-      icon: 'documents',
-      action: () => {
-        setShowStartMenu(false)
-        window.open('/documents/CV Aymane Lamssaqui.pdf', '_blank')
-      }
-    },
-    {
-      name: 'Shut Down',
-      icon: 'shutdown',
-      action: () => {
-        setShowStartMenu(false)
-        if (confirm('Are you sure you want to shut down?')) {
-          window.location.reload()
-        }
-      }
-    }
+    { id: 'portfolio', title: 'Portfolio.exe', icon: '📁' },
+    { id: 'about', title: 'About.txt', icon: '📄' },
+    { id: 'experience', title: 'Experience.doc', icon: '📑' },
+    { id: 'contact', title: 'Contact.com', icon: '✉️' },
+    { id: 'projects', title: 'Projects.fld', icon: '🗂️' }
   ]
 
   const openWindow = (id: string) => {
     playSound('click')
     setActiveWindow(id)
+    const existingWindow = windows.find(w => w.id === id)
     
-    if (!windows.some(w => w.id === id)) {
+    if (!existingWindow) {
       setWindows([...windows, { 
         id, 
         isOpen: true, 
         isMinimized: false,
-        position: getNextWindowPosition()
+        position: { 
+          x: 100 + windows.length * 20, 
+          y: 100 + windows.length * 20 
+        }
       }])
-    } else {
-      setWindows(windows.map(w => ({
-        ...w,
-        isMinimized: w.id === id ? false : w.isMinimized
-      })))
     }
   }
 
@@ -130,18 +93,16 @@ export default function Desktop({ playSound }: DesktopProps) {
   }
 
   const updateWindowPosition = (id: string, position: { x: number, y: number }) => {
-    const boundedPos = {
-      x: Math.max(0, Math.min(position.x, window.innerWidth - 800)),
-      y: Math.max(0, Math.min(position.y, window.innerHeight - 600))
-    }
     setWindows(windows.map(w => 
-      w.id === id ? {...w, position: boundedPos} : w
+      w.id === id ? {...w, position} : w
     ))
   }
 
   const getWindowContent = (id: string) => {
+    if (id === 'portfolio') {
+      return <PortfolioContent />
+    }
     switch(id) {
-      case 'portfolio': return <PortfolioContent />
       case 'about': return <About />
       case 'experience': return <Experience />
       case 'projects': return <Projects />
@@ -151,11 +112,13 @@ export default function Desktop({ playSound }: DesktopProps) {
   }
 
   const PortfolioContent = () => {
-    const [activeTab, setActiveTab] = useState('home')
-    
     return (
       <div className="w-full h-full flex">
-        <div className="w-48 bg-gray-200 border-r border-gray-400 p-2">
+        {/* Enhanced Sidebar */}
+        <div className="w-48 bg-gray-200 border-r border-gray-400 p-2 flex flex-col">
+          <div className="p-2 mb-4 bg-blue-600 text-white font-bold text-center">
+            Navigation
+          </div>
           {['home', 'about', 'experience', 'projects', 'contact'].map(tab => (
             <button
               key={tab}
@@ -163,44 +126,23 @@ export default function Desktop({ playSound }: DesktopProps) {
                 setActiveTab(tab)
                 playSound('click')
               }}
-              className={`w-full text-left px-4 py-2 mb-1 ${activeTab === tab ? 
+              className={`w-full text-left px-4 py-2 mb-1 flex items-center ${activeTab === tab ? 
                 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-300'}`}
             >
+              <span className="mr-2 text-lg">
+                {tab === 'home' ? '🏠' : 
+                 tab === 'about' ? '📄' : 
+                 tab === 'experience' ? '📑' : 
+                 tab === 'projects' ? '🗂️' : '✉️'}
+              </span>
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
         
-        <div className="flex-1 overflow-auto p-4">
-          {activeTab === 'home' && (
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl font-bold mb-6">Welcome to My Digital Portfolio</h1>
-              <div className="space-y-6">
-                <p>
-                  I'm a passionate developer with expertise in full-stack development, 
-                  3D modeling, and creative problem solving.
-                </p>
-                <div className="border border-gray-300 p-4 bg-gray-50">
-                  <h2 className="font-bold mb-2">Quick Links</h2>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>About - Learn about my background and skills</li>
-                    <li>Experience - See my professional journey</li>
-                    <li>Projects - Check out my work</li>
-                    <li>Contact - Get in touch with me</li>
-                  </ul>
-                </div>
-                <a 
-                  href="/documents/CV Aymane Lamssaqui.pdf" 
-                  download="Aymane_Lamsaqui_CV.pdf"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                  onClick={() => playSound('click')}
-                >
-                  <Icon name="documents" className="mr-2" />
-                  Download Resume
-                </a>
-              </div>
-            </div>
-          )}
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto bg-white">
+          {activeTab === 'home' && <HomeContent />}
           {activeTab === 'about' && <About />}
           {activeTab === 'experience' && <Experience />}
           {activeTab === 'projects' && <Projects />}
@@ -210,8 +152,36 @@ export default function Desktop({ playSound }: DesktopProps) {
     )
   }
 
+  const HomeContent = () => (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Welcome to My Portfolio</h1>
+      <div className="space-y-6">
+        <p className="text-lg">
+          I'm a passionate developer with experience in full-stack development,
+          3D modeling, and creative problem solving.
+        </p>
+        <div className="border border-gray-300 p-4 bg-gray-50">
+          <h2 className="font-bold mb-3 text-xl">Quick Links</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>About - Learn about my background and skills</li>
+            <li>Experience - See my professional journey</li>
+            <li>Projects - Check out my work</li>
+            <li>Contact - Get in touch with me</li>
+          </ul>
+        </div>
+        <button 
+          className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          onClick={() => playSound('click')}
+        >
+          Download Resume
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="w-full h-full bg-teal-900 bg-[url('/win95-bg.jpg')] bg-cover p-4 relative">
+      {/* Desktop Icons */}
       <div className="grid grid-cols-1 gap-8 w-min">
         {desktopIcons.map(icon => (
           <button
@@ -220,7 +190,7 @@ export default function Desktop({ playSound }: DesktopProps) {
             className="flex flex-col items-center w-20 gap-1 text-center text-white"
           >
             <div className="w-12 h-12 bg-gray-100 flex items-center justify-center text-2xl">
-              <Icon name={icon.icon} size={24} />
+              {icon.icon}
             </div>
             <span className="text-white text-shadow bg-blue-800 px-1">
               {icon.title}
@@ -229,6 +199,7 @@ export default function Desktop({ playSound }: DesktopProps) {
         ))}
       </div>
 
+      {/* Windows */}
       {windows.map(window => !window.isMinimized && (
         <Window
           key={window.id}
@@ -238,14 +209,15 @@ export default function Desktop({ playSound }: DesktopProps) {
           onMinimize={() => minimizeWindow(window.id)}
           onFocus={() => setActiveWindow(window.id)}
           position={window.position}
-          size={{ width: 800, height: 600 }}
+          size={{ width: 1100, height: 600 }}
           onPositionChange={(pos) => updateWindowPosition(window.id, pos)}
         >
           {getWindowContent(window.id)}
         </Window>
       ))}
 
-      <div className="fixed bottom-0 left-0 right-0 h-8 bg-gray-400 border-t border-gray-300 flex items-center px-2 z-50">
+      {/* Taskbar */}
+      <div className="fixed bottom-0 left-0 right-0 h-8 bg-gray-400 border-t border-gray-300 flex items-center px-2 z-[9999] rounded-b-lg shadow-[0_-2px_5px_rgba(0,0,0,0.2)]">
         <button 
           className="h-6 px-3 bg-gray-300 border border-gray-500 flex items-center"
           onClick={() => {
@@ -253,10 +225,10 @@ export default function Desktop({ playSound }: DesktopProps) {
             setShowStartMenu(!showStartMenu)
           }}
         >
-          <Icon name="start" size={16} className="mr-1" />
-          <span className="font-bold">Start</span>
+          <span className="font-bold mr-2">Start</span>
         </button>
         
+        {/* Taskbar buttons for minimized windows */}
         <div className="flex ml-2 space-x-1">
           {windows.filter(w => w.isMinimized).map(window => (
             <button
@@ -271,11 +243,21 @@ export default function Desktop({ playSound }: DesktopProps) {
         
         <div className="flex-1"></div>
         
+        {/* Sound control */}
+        <button 
+          onClick={toggleMute}
+          className="h-6 px-2 bg-gray-300 border border-gray-500 flex items-center text-sm mr-1"
+        >
+          {isMuted ? '🔇' : '🔈'}
+        </button>
+        
+        {/* Clock */}
         <div className="h-6 px-3 bg-gray-300 border border-gray-500 flex items-center text-sm">
           {time}
         </div>
       </div>
 
+      {/* Start Menu */}
       {showStartMenu && (
         <div 
           className="fixed bottom-8 left-0 w-48 bg-gray-300 border border-gray-500 z-50"
@@ -285,16 +267,42 @@ export default function Desktop({ playSound }: DesktopProps) {
             Windows 95
           </div>
           <div className="divide-y divide-gray-400">
-            {startMenuItems.map((item) => (
-              <button
-                key={item.name}
-                className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white flex items-center"
-                onClick={item.action}
-              >
-                <Icon name={item.icon} size={16} className="mr-2" />
-                {item.name}
-              </button>
-            ))}
+            <button 
+              className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
+              onClick={() => {
+                playSound('click')
+                setShowStartMenu(false)
+              }}
+            >
+              Programs
+            </button>
+            <button 
+              className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
+              onClick={() => {
+                playSound('click')
+                setShowStartMenu(false)
+              }}
+            >
+              Documents
+            </button>
+            <button 
+              className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
+              onClick={() => {
+                playSound('click')
+                setShowStartMenu(false)
+              }}
+            >
+              Settings
+            </button>
+            <button 
+              className="w-full text-left px-2 py-1 hover:bg-blue-600 hover:text-white"
+              onClick={() => {
+                playSound('click')
+                setShowStartMenu(false)
+              }}
+            >
+              Shut Down...
+            </button>
           </div>
         </div>
       )}

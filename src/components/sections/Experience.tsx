@@ -102,7 +102,6 @@ const experiences: ExperienceItem[] = [
 export default function Experience() {
   return (
     <div className="p-2 font-mono text-black bg-white h-full overflow-auto relative">
-      <UnderConstructionTape text="EXPERIENCE SECTION" position="top" />
       
       <div className="border-b border-gray-400 mb-4 pb-2">
         <h2 className="text-xl font-bold">Professional Experience</h2>
@@ -145,7 +144,10 @@ export default function Experience() {
               </div>
               
               {exp.model && (
-                <div className="w-full md:w-64 h-64 bg-gray-100 rounded-lg overflow-hidden">
+                <div 
+                  id="model-container"
+                  className="w-full md:w-64 h-64 bg-white rounded-lg overflow-hidden relative"
+                  >
                   {exp.model === 'engine' && <EngineModelWrapper />}
                   {exp.model === 'truck' && <TruckModelWrapper />}
                   {exp.model === 'symolia' && <SymoliaModelWrapper />}

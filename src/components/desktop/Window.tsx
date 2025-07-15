@@ -1,5 +1,5 @@
 'use client'
-import { HTMLAttributes, useEffect, useState } from 'react'
+import { HTMLAttributes, useState, useRef, useEffect } from 'react'
 
 interface WindowProps extends HTMLAttributes<HTMLDivElement> {
   title: string
@@ -28,18 +28,22 @@ export default function Window({
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [windowPosition, setWindowPosition] = useState(position)
+  const windowRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setWindowPosition(position)
+  }, [position])
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement
-    if (target.classList.contains('window-title-bar')) {
-      setIsDragging(true)
-      setDragOffset({
-        x: e.clientX - windowPosition.x,
-        y: e.clientY - windowPosition.y
-      })
-      onFocus()
-      e.stopPropagation()
-    }
+    if (e.button !== 0) return
+    
+    setIsDragging(true)
+    setDragOffset({
+      x: e.clientX - windowPosition.x,
+      y: e.clientY - windowPosition.y
+    })
+    onFocus()
+    e.preventDefault()
   }
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -67,15 +71,12 @@ export default function Window({
         window.removeEventListener('mouseup', handleMouseUp)
       }
     }
-  }, [isDragging])
-
-  useEffect(() => {
-    setWindowPosition(position)
-  }, [position])
+  }, [isDragging, dragOffset])
 
   return (
     <div
       {...props}
+      ref={windowRef}
       className={`absolute border-2 ${isActive ? 'border-gray-300' : 'border-gray-500'} bg-gray-200 shadow-lg`}
       style={{
         left: `${windowPosition.x}px`,
@@ -89,14 +90,15 @@ export default function Window({
           inset -2px -2px #808080,
           inset 2px 2px #ffffff
         `,
-        fontFamily: '"Press Start 2P", cursive'
+        fontFamily: '"MS Sans Serif", sans-serif'
       }}
     >
+      {/* Title Bar */}
       <div 
-        className={`flex items-center justify-between px-2 h-6 ${isActive ? 'bg-blue-800' : 'bg-gray-500'} text-white cursor-move window-title-bar`}
+        className={`flex items-center justify-between px-2 h-6 ${isActive ? 'bg-blue-800' : 'bg-gray-500'} text-white cursor-move`}
         onMouseDown={handleMouseDown}
       >
-        <div className="font-bold text-xs">{title}</div>
+        <div className="font-bold">{title}</div>
         <div className="flex gap-1">
           <button 
             onClick={(e) => { e.stopPropagation(); onMinimize() }}
@@ -113,6 +115,7 @@ export default function Window({
         </div>
       </div>
       
+      {/* Content */}
       <div className="p-2 h-[calc(100%-24px)] overflow-auto bg-white">
         {children}
       </div>
