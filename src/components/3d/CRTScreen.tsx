@@ -118,7 +118,7 @@ function CameraController({
   return null
 }
 
-export default function CRTScreen() {
+export default function CRTScree ({ children }: { children: React.ReactNode })  {
   const [state, setState] = useState<AppState>('booting')
   const [showBootScreen, setShowBootScreen] = useState(true)
   const [interactionReady, setInteractionReady] = useState(false)
