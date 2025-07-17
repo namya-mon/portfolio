@@ -181,7 +181,7 @@ body {
 
 .project-image {
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 4/3;
   background-color: #e0e0e0;
 }
 

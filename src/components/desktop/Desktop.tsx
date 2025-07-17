@@ -5,6 +5,7 @@ import Contact from '@/components/sections/Contact'
 import Experience from '@/components/sections/Experience'
 import Projects from '@/components/sections/Projects'
 import { useEffect, useRef, useState } from 'react'
+import Clock from '../ui/Clock'
 
 interface DesktopProps {
   playSound: (sound: 'startup' | 'click' | 'close') => void
@@ -25,7 +26,7 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
       id: 'portfolio', 
       isOpen: true, 
       isMinimized: false,
-      position: { x: 100, y: 100 }
+      position: { x: 110, y: 15 }
     }
   ])
   
@@ -34,35 +35,6 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
   const timeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const [showStartMenu, setShowStartMenu] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
-
-  // Update time every minute
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date()
-      const formattedTime = now.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-      setTime(formattedTime)
-    }
-
-    const now = new Date()
-    const secondsUntilNextMinute = 60 - now.getSeconds()
-    
-    updateTime()
-    
-    const initialTimeout = setTimeout(() => {
-      updateTime()
-      timeIntervalRef.current = setInterval(updateTime, 60000)
-    }, secondsUntilNextMinute * 1000)
-
-    return () => {
-      clearTimeout(initialTimeout)
-      if (timeIntervalRef.current) {
-        clearInterval(timeIntervalRef.current)
-      }
-    }
-  }, [])
 
   const desktopIcons = [
     { id: 'portfolio', title: 'Portfolio.exe', icon: '📁' },
@@ -84,7 +56,7 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
         isMinimized: false,
         position: { 
           x: 100 + windows.length * 20, 
-          y: 100 + windows.length * 20 
+          y: 30 + windows.length * 20 
         }
       }])
     }
@@ -247,7 +219,7 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
             onMinimize={() => minimizeWindow(window.id)}
             onFocus={() => setActiveWindow(window.id)}
             position={window.position}
-            size={{ width: 1100, height: 600 }}
+            size={{ width: 1100, height: 700 }}
             onPositionChange={(pos) => updateWindowPosition(window.id, pos)}
           >
             {getWindowContent(window.id)}
@@ -292,7 +264,7 @@ export default function Desktop({ playSound, isMuted, toggleMute }: DesktopProps
         
         {/* Clock */}
         <div className="h-6 px-3 bg-gray-300 border border-gray-500 flex items-center text-sm">
-          {time}
+          <Clock />
         </div>
       </div>
 

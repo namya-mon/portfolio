@@ -6,6 +6,7 @@ import { Environment, Html, useGLTF } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import Clock from '../ui/Clock'
 
 type AppState = 'booting' | 'waiting' | 'zoomed' | 'zoomedIn'
 
@@ -34,22 +35,22 @@ function MonitorModel({ children, zoomed }: {
   }, [nodes])
 
   const getScaleFactor = () => {
-    const widthRatio = size.width / 1000
-    const heightRatio = size.height / 600
+    const widthRatio = size.width / 1100
+    const heightRatio = size.height / 700
     return Math.min(widthRatio, heightRatio) * 0.9
   }
 
   const scaleFactor = getScaleFactor()
 
   return (
-    <group ref={group} scale={[scaleFactor, scaleFactor, scaleFactor]} position={[0, -1.5, 0]}>
+    <group ref={group} scale={[scaleFactor, scaleFactor, scaleFactor]} position={[0, -1.8, 0]}>
       <primitive object={scene} />
       <group ref={screenRef} position={[0, 1.45, -0.263]} rotation={[0, 0, 0]}>
         <Html
           transform
           distanceFactor={1}
           style={{
-            width: `${screenSize[0] * 94}px`,
+            width: `${screenSize[0] * 95}px`,
             height: `${screenSize[1] * 85}px`,
             overflow: 'hidden',
             background: '#000',
@@ -84,9 +85,9 @@ function CameraController({
   const currentPosition = useRef(new THREE.Vector3())
 
   const cameraPositions = {
-    waiting: new THREE.Vector3(-10 , 5, 15), // Top-left angle, further away
+    waiting: new THREE.Vector3(-10 , 6, 15), // Top-left angle, further away
     zoomed: new THREE.Vector3(0, 0, 6),
-    zoomedIn: new THREE.Vector3(0, 0, 4.3)
+    zoomedIn: new THREE.Vector3(0, 0, 2.9)
   }
 
   useEffect(() => {
@@ -129,37 +130,7 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
   const timeIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Time updater - optimized to only update when minute changes
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date()
-      const formattedTime = now.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-      setCurrentTime(formattedTime)
-    }
 
-    // Calculate time until next minute
-    const now = new Date()
-    const secondsUntilNextMinute = 60 - now.getSeconds()
-    
-    // Initial update
-    updateTime()
-    
-    // Set timeout for next minute change
-    const initialTimeout = setTimeout(() => {
-      updateTime()
-      // Then set regular interval
-      timeIntervalRef.current = setInterval(updateTime, 60000)
-    }, secondsUntilNextMinute * 1000)
-
-    return () => {
-      clearTimeout(initialTimeout)
-      if (timeIntervalRef.current) {
-        clearInterval(timeIntervalRef.current)
-      }
-    }
-  }, [])
 
   const playSound = (sound: 'startup' | 'click' | 'close') => {
     if (isMuted) return
@@ -278,7 +249,7 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
             <div className="text-black">
               <div className="text-xl font-medium">Aymane Lamssaqui</div>
               <div className="text-sm text-gray-600">Software Engineer</div>
-              <div className="text-xs text-gray-500 mt-1">{currentTime}</div>
+              <div className="text-sm text-black-600 font-medium"><Clock /></div>
             </div>
           </div>
         </>

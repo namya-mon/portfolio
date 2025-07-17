@@ -2,6 +2,7 @@
 import { Icon } from '@/components/ui/Icones'
 import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 
 interface DevProjectsProps {
   onBack: () => void
@@ -41,11 +42,27 @@ const projects: Project[] = [
     description: "Interactive portfolio with Windows 95 inspired interface",
     tags: ["React", "Three.js", "Next.js"],
     image: "/images/projects/portfolio.jpg",
-    link: "#"
+    link: "#",
+    underConstruction: true
   }
 ]
 
 export default function DevProjects({ onBack }: DevProjectsProps) {
+  const [dimensions, setDimensions] = useState<Record<number, {width: number, height: number}>>({});
+
+  useEffect(() => {
+    projects.forEach(project => {
+      const img = new window.Image();
+      img.src = project.image;
+      img.onload = () => {
+        setDimensions(prev => ({
+          ...prev,
+          [project.id]: { width: img.width, height: img.height }
+        }));
+      };
+    });
+  }, []);
+
   return (
     <div className="w-full h-full p-4 overflow-auto">
       <button 
@@ -68,13 +85,23 @@ export default function DevProjects({ onBack }: DevProjectsProps) {
             <h2 className="text-xl font-bold mb-2">{project.title}</h2>
             <p className="mb-4">{project.description}</p>
             
-            <div className="relative h-64 w-full mb-4">
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                className="object-cover border border-gray-300"
-              />
+            <div className="relative w-full mb-4">
+              <div 
+                className="relative" 
+                style={{ 
+                  paddingBottom: dimensions[project.id] 
+                    ? `${(dimensions[project.id].height / dimensions[project.id].width) * 100}%` 
+                    : '56.25%'
+                }}
+              >
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-cover border border-gray-300"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
             </div>
             
             <div className="flex flex-wrap gap-2">
