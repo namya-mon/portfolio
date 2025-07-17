@@ -1,6 +1,7 @@
 'use client'
 import { Icon } from '@/components/ui/Icones'
 import { useState } from 'react'
+import UnderConstructionTape from '../ui/UnderConstructionTape'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -51,6 +52,7 @@ export default function Contact() {
 
   return (
     <div className="p-2 font-mono text-black bg-white h-full overflow-auto">
+      <UnderConstructionTape text="Under Condstruction" position="top" />
       <div className="border-b border-gray-400 mb-4 pb-2">
         <h2 className="text-xl font-bold">Contact</h2>
       </div>

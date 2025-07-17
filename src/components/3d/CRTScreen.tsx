@@ -35,15 +35,24 @@ function MonitorModel({ children, zoomed }: {
   }, [nodes])
 
   const getScaleFactor = () => {
-    const widthRatio = size.width / 1100
-    const heightRatio = size.height / 700
-    return Math.min(widthRatio, heightRatio) * 0.9
+    // Calculate based on viewport dimensions
+    const targetWidth = size.width * 0.9 // 90% of viewport width
+    const targetHeight = size.height * 0.9 // 90% of viewport height
+    const baseWidth = 1200 // Base content width
+    const baseHeight = 800 // Base content height
+    
+    // Calculate scale needed to fit either width or height
+    const widthScale = targetWidth / baseWidth
+    const heightScale = targetHeight / baseHeight
+    
+    // Use the smaller scale to ensure content fits entirely
+    return Math.min(widthScale, heightScale) * (zoomed ? 1 : 0.8)
   }
 
   const scaleFactor = getScaleFactor()
 
   return (
-    <group ref={group} scale={[scaleFactor, scaleFactor, scaleFactor]} position={[0, -1.8, 0]}>
+    <group ref={group} scale={[scaleFactor, scaleFactor, scaleFactor]} position={[0, -1.5, 0]}>
       <primitive object={scene} />
       <group ref={screenRef} position={[0, 1.45, -0.263]} rotation={[0, 0, 0]}>
         <Html
@@ -62,7 +71,7 @@ function MonitorModel({ children, zoomed }: {
           <div className="w-full h-full crt-effect">
             <PortfolioModeProvider>
               <div className="w-full h-full overflow-hidden">
-                {children || <div className="w-full h-full bg-black" />}
+                {children}
               </div>
             </PortfolioModeProvider>
           </div>
@@ -72,6 +81,7 @@ function MonitorModel({ children, zoomed }: {
   )
 }
 
+// Updated CRTScreen.tsx (partial changes)
 function CameraController({ 
   state,
   onZoomComplete,
@@ -79,15 +89,21 @@ function CameraController({
   state: Exclude<AppState, 'booting'>,
   onZoomComplete: () => void,
 }) {
-  const { camera } = useThree()
+  const { camera, size } = useThree()
   const mouse = useRef({ x: 0, y: 0 })
   const targetPosition = useRef(new THREE.Vector3())
   const currentPosition = useRef(new THREE.Vector3())
 
+  // Adjusted camera positions
   const cameraPositions = {
-    waiting: new THREE.Vector3(-10 , 6, 15), // Top-left angle, further away
+    waiting: new THREE.Vector3(-10, 5, 15),
     zoomed: new THREE.Vector3(0, 0, 6),
-    zoomedIn: new THREE.Vector3(0, 0, 2.9)
+    zoomedIn: new THREE.Vector3(0, 0, 3)
+  }
+
+  // Adjust for mobile devices
+  const getYOffset = () => {
+    return size.height > size.width ? -2 : 0 // Lower camera for vertical monitors
   }
 
   useEffect(() => {
@@ -104,12 +120,18 @@ function CameraController({
   useFrame(() => {
     targetPosition.current.copy(cameraPositions[state])
     const factor = state === 'waiting' ? 0.7 : state === 'zoomed' ? 0.4 : 0.1
+    
+    // Apply long ass vertical monitors offset
+    if (state === 'waiting') {
+      targetPosition.current.y += getYOffset()
+    }
+    
     targetPosition.current.x += mouse.current.x * factor
     targetPosition.current.y += mouse.current.y * factor * 0.5
 
     currentPosition.current.lerp(targetPosition.current, 0.1)
     camera.position.copy(currentPosition.current)
-    camera.lookAt(0, 0, 0)
+    camera.lookAt(0, getYOffset() * 0.5, 0) // Adjust look-at for vertical monitors
 
     if (state === 'zoomed' && currentPosition.current.distanceTo(targetPosition.current) < 0.05) {
       onZoomComplete()
@@ -124,13 +146,23 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
   const [showBootScreen, setShowBootScreen] = useState(true)
   const [interactionReady, setInteractionReady] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
-  const [currentTime, setCurrentTime] = useState('')
   const monitorRef = useRef<HTMLDivElement>(null)
   const ambientSoundRef = useRef<HTMLAudioElement | null>(null)
-  const timeIntervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Time updater - optimized to only update when minute changes
-
+  
+  // State that needs to be preserved
+  const [desktopState, setDesktopState] = useState({
+    windows: [
+      { 
+        id: 'portfolio', 
+        isOpen: true, 
+        isMinimized: false,
+        position: { x: 110, y: 15 }
+      }
+    ],
+    activeWindow: 'portfolio',
+    showStartMenu: false,
+    activeTab: 'home'
+  })
 
   const playSound = (sound: 'startup' | 'click' | 'close') => {
     if (isMuted) return
@@ -142,30 +174,21 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
   const toggleMute = () => {
     setIsMuted(!isMuted)
     if (ambientSoundRef.current) {
-      if (!isMuted) {
-        ambientSoundRef.current.pause()
-      } else {
-        ambientSoundRef.current.play().catch(e => console.log("Ambient audio play failed:", e))
-      }
+      ambientSoundRef.current.volume = isMuted ? 0.2 : 0
     }
   }
 
+  // Initialize ambient sound only once
   useEffect(() => {
-    if (!showBootScreen && state !== 'booting') {
+    if (!showBootScreen && state !== 'booting' && !ambientSoundRef.current) {
       ambientSoundRef.current = new Audio('/sounds/ambient.wav')
       ambientSoundRef.current.loop = true
-      ambientSoundRef.current.volume = 0.2
-      
-      if (!isMuted) {
-        ambientSoundRef.current.play().catch(e => console.log("Ambient audio play failed:", e))
-      }
+      ambientSoundRef.current.volume = isMuted ? 0 : 0.2
+      ambientSoundRef.current.play().catch(e => console.log("Ambient audio play failed:", e))
     }
 
     return () => {
-      if (ambientSoundRef.current) {
-        ambientSoundRef.current.pause()
-        ambientSoundRef.current = null
-      }
+      // Don't clean up the sound unless unmounting
     }
   }, [showBootScreen, state, isMuted])
 
@@ -197,25 +220,12 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const handleWheel = (e: WheelEvent) => {
-    const monitorContent = monitorRef.current;
-    if (monitorContent && monitorContent.contains(e.target as Node)) {
-      const contentArea = monitorContent.querySelector('.window-content-area');
-      if (contentArea) {
-        contentArea.scrollTop += e.deltaY;
-        e.preventDefault();
-      }
-    }
-  }
-
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('click', handleClick)
-    window.addEventListener('wheel', handleWheel, { passive: false })
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('click', handleClick)
-      window.removeEventListener('wheel', handleWheel)
     }
   }, [state])
 
@@ -224,7 +234,6 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
       {/* Corner Info Display and Mute Button */}
       {!showBootScreen && (
         <>
-          {/* Mute Button - Top Left */}
           <button
             onClick={toggleMute}
             className="absolute top-6 left-6 z-10 p-2 text-black hover:text-gray-600 transition-colors"
@@ -244,7 +253,6 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
             )}
           </button>
 
-          {/* Corner Info - Top Right */}
           <div className="absolute top-6 right-6 z-10 text-right pointer-events-none">
             <div className="text-black">
               <div className="text-xl font-medium">Aymane Lamssaqui</div>
@@ -271,12 +279,20 @@ export default function CRTScreen({ children }: { children: React.ReactNode }) {
             <MonitorModel zoomed={state === 'zoomedIn'}>
               <div 
                 ref={monitorRef}
-                className="monitor-content w-full h-full"
+                className="monitor-content w-full h-full crt-effect"
                 onClick={(e) => e.stopPropagation()}
                 onMouseEnter={() => handleScreenHover(true)}
                 onMouseLeave={() => handleScreenHover(false)}
               >
-                <Desktop playSound={playSound} isMuted={isMuted} toggleMute={toggleMute} />
+                <PortfolioModeProvider>
+                  <Desktop 
+                    playSound={playSound} 
+                    isMuted={isMuted} 
+                    toggleMute={toggleMute}
+                    desktopState={desktopState}
+                    setDesktopState={setDesktopState}
+                  />
+                </PortfolioModeProvider>
               </div>
             </MonitorModel>
           </Suspense>
