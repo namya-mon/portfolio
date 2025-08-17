@@ -37,5 +37,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Take a look
 
-Check out the [portfolio]([https://aymane-lamssaqui-portfolio.vercel.app/]) for more details on my projects and make sure to have fun!!!
+Check out the [portfolio](https://aymane-lamssaqui-portfolio.vercel.app/) for more details on my projects and make sure to have fun!!!
 
