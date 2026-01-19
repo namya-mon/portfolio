@@ -1,5 +1,4 @@
 'use client'
-import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { Icon } from '../ui/Icones'
@@ -161,7 +160,7 @@ export default function Experience() {
 
       <div className="mt-8 flex justify-center">
         <a 
-          href="/documents/CV Aymane Lamssaqui.pdf" 
+          href="/documents/CV Aymane Lamssaqui General.pdf" 
           download="Aymane_Lamsaqui_CV.pdf"
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >

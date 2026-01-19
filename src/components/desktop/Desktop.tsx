@@ -119,7 +119,7 @@ export default function Desktop({ playSound, isMuted, toggleMute, desktopState, 
 
   const openCV = () => {
     playSound('click')
-    window.open('/documents/CV Aymane Lamssaqui.pdf', '_blank')
+    window.open('/documents/CV Aymane Lamssaqui General.pdf', '_blank')
     setDesktopState(prev => ({ ...prev, showStartMenu: false }))
   }
 
@@ -199,7 +199,7 @@ export default function Desktop({ playSound, isMuted, toggleMute, desktopState, 
         </div>
         <div className="mt-8 flex justify-center">
                 <a 
-                  href="/documents/CV Aymane Lamssaqui.pdf" 
+                  href="/documents/CV Aymane Lamssaqui General.pdf" 
                   download="Aymane_Lamsaqui_CV.pdf"
                   className="inline-flex items-left px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                 >
