@@ -81,7 +81,7 @@ function MonitorModel({ children, zoomed }: {
   )
 }
 
-// Updated CRTScreen.tsx (partial changes)
+// Updated CRTScreen.tsx 
 function CameraController({ 
   state,
   onZoomComplete,

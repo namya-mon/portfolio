@@ -5,6 +5,8 @@ import About from '@/components/sections/About'
 import Contact from '@/components/sections/Contact'
 import Experience from '@/components/sections/Experience'
 import Projects from '@/components/sections/Projects'
+import Paint from '../apps/Paint'
+import Minesweeper from '../apps/Minesweeper'
 import { useRef } from 'react'
 import Clock from '../ui/Clock'
 import { Icon } from '../ui/Icones'
@@ -46,7 +48,9 @@ export default function Desktop({ playSound, isMuted, toggleMute, desktopState, 
     { id: 'about', title: 'About.txt', icon: '📄' },
     { id: 'experience', title: 'Experience.doc', icon: '📑' },
     { id: 'contact', title: 'Contact.com', icon: '✉️' },
-    { id: 'projects', title: 'Projects.fld', icon: '🗂️' }
+    { id: 'projects', title: 'Projects.fld', icon: '🗂️' },
+    { id: 'paint', title: 'Paint.exe', icon: '🎨' },
+    { id: 'minesweeper', title: 'Minesweeper.exe', icon: '💣' }
   ]
 
   const openWindow = (id: string) => {
@@ -137,6 +141,8 @@ export default function Desktop({ playSound, isMuted, toggleMute, desktopState, 
       case 'experience': return <Experience />
       case 'projects': return <Projects />
       case 'contact': return <Contact />
+      case 'paint': return <Paint />
+      case 'minesweeper': return <Minesweeper />
       default: return null
     }
   }
