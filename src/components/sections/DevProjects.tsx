@@ -2,7 +2,7 @@
 import { Icon } from '@/components/ui/Icones'
 import UnderConstructionTape from '@/components/ui/UnderConstructionTape'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface DevProjectsProps {
   onBack: () => void
@@ -44,6 +44,15 @@ const projects: Project[] = [
     image: "/images/projects/portfolio.jpg",
     link: "#",
     underConstruction: true
+  },
+  {
+    id: 4,
+    title: "Beat Da Beat CO-OP Mod",
+    description: "This MOD adds Local Co-oP and multiplayer scaling to boss HP(could be toggled on and off)",
+    tags: ["Unity", "C#", "Game Development","Pixel Art"],
+    image: "/images/projects/bdb.png",
+    link: "#",
+    underConstruction: false
   }
 ]
 

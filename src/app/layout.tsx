@@ -1,6 +1,7 @@
 'use client'
 import Footer from '@/components/Footer'
 import { PortfolioModeProvider } from '@/context/PortfolioMode'
+import { Analytics } from "@vercel/analytics/next"
 import './globals.css'
 
 export default function RootLayout({
@@ -13,6 +14,7 @@ export default function RootLayout({
       <body className="min-h-screen">
         <PortfolioModeProvider>
           {children}
+          <Analytics/>
           <Footer />
         </PortfolioModeProvider>
       </body>
