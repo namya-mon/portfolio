@@ -51,7 +51,7 @@ const projects: Project[] = [
     description: "This MOD adds Local Co-oP and multiplayer scaling to boss HP(could be toggled on and off)",
     tags: ["Unity", "C#", "Game Development","Pixel Art"],
     image: "/images/projects/bdb.png",
-    link: "#",
+    link: "https://www.nexusmods.com/beatdabeat/mods/1",
     underConstruction: false
   }
 ]
